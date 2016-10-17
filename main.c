@@ -32,6 +32,7 @@ static long diff_in_us(struct timespec t1, struct timespec t2)
 int main(int argc, char *argv[])
 {
     /* verify the result of 4x4 matrix */
+#if defined(VERIFY)
     {
         int testin[16] = { 0, 1,  2,  3,  4,  5,  6,  7,
                            8, 9, 10, 11, 12, 13, 14, 15
@@ -56,6 +57,7 @@ int main(int argc, char *argv[])
         assert(0 == memcmp(testout, expected, 16 * sizeof(int)) &&
                "Verification fails");
     }
+#endif
 
     {
         struct timespec start, end;
@@ -72,17 +74,29 @@ int main(int argc, char *argv[])
         clock_gettime(CLOCK_REALTIME, &start);
         sse_prefetch_transpose(src, out0, TEST_W, TEST_H);
         clock_gettime(CLOCK_REALTIME, &end);
+#if defined(BENCH)
+        printf("%ld, ", diff_in_us(start, end));
+#else
         printf("sse prefetch: \t %ld us\n", diff_in_us(start, end));
+#endif
 
         clock_gettime(CLOCK_REALTIME, &start);
         sse_transpose(src, out1, TEST_W, TEST_H);
         clock_gettime(CLOCK_REALTIME, &end);
+#if defined(BENCH)
+        printf("%ld, ", diff_in_us(start, end));
+#else
         printf("sse: \t\t %ld us\n", diff_in_us(start, end));
+#endif
 
         clock_gettime(CLOCK_REALTIME, &start);
         naive_transpose(src, out2, TEST_W, TEST_H);
         clock_gettime(CLOCK_REALTIME, &end);
+#if defined(BENCH)
+        printf("%ld\n", diff_in_us(start, end));
+#else
         printf("naive: \t\t %ld us\n", diff_in_us(start, end));
+#endif
 
         free(src);
         free(out0);
