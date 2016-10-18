@@ -17,5 +17,11 @@ perf: bench
 	sudo perf stat -r 100 -e cache-misses -e cache-references -e instructions -e cycles ./bench > result.txt
 	gnuplot plot/exec.gp
 
+prefetch: $(GIT_HOOKS) main.c
+	$(CC) $(CFLAGS) -DPREFETCH_BENCH -o $@ main.c
+
+gencsv: prefetch
+	./prefetch > result.csv       
+
 clean:
-	$(RM) main bench result.txt *.png
+	$(RM) main bench prefetch result.txt *.png *.csv

@@ -71,6 +71,7 @@ int main(int argc, char *argv[])
             for (int x = 0; x < TEST_W; x++)
                 *(src + y * TEST_W + x) = rand();
 
+#ifndef PREFETCH_BENCH
         clock_gettime(CLOCK_REALTIME, &start);
         sse_prefetch_transpose(src, out0, TEST_W, TEST_H);
         clock_gettime(CLOCK_REALTIME, &end);
@@ -96,6 +97,18 @@ int main(int argc, char *argv[])
         printf("%ld\n", diff_in_us(start, end));
 #else
         printf("naive: \t\t %ld us\n", diff_in_us(start, end));
+#endif
+
+#else
+        for(int i = 0; i < 50; i++) {
+#if defined(__GNUC__)
+            __builtin___clear_cache((int *) src ,(int *) src + (sizeof(int) * TEST_W * TEST_H));
+#endif
+            clock_gettime(CLOCK_REALTIME, &start);
+            sse_prefetch_transpose_2(src, out0, TEST_W, TEST_H, i*4);
+            clock_gettime(CLOCK_REALTIME, &end);
+            printf("%d,%ld\n", i*4, diff_in_us(start, end));
+        }
 #endif
 
         free(src);
