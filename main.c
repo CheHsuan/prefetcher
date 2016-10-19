@@ -4,7 +4,7 @@
 #include <sys/time.h>
 #include <string.h>
 #include <assert.h>
-
+#include <omp.h>
 #include <xmmintrin.h>
 
 #define TEST_W 4096
@@ -72,6 +72,9 @@ int main(int argc, char *argv[])
                 *(src + y * TEST_W + x) = rand();
 
 #ifndef PREFETCH_BENCH
+#if defined(__GNUC__)
+        __builtin___clear_cache((int *) src ,(int *) src + (sizeof(int) * TEST_W * TEST_H));
+#endif
         clock_gettime(CLOCK_REALTIME, &start);
         sse_prefetch_transpose(src, out0, TEST_W, TEST_H);
         clock_gettime(CLOCK_REALTIME, &end);
@@ -80,7 +83,20 @@ int main(int argc, char *argv[])
 #else
         printf("sse prefetch: \t %ld us\n", diff_in_us(start, end));
 #endif
-
+#if defined(__GNUC__)
+        __builtin___clear_cache((int *) src ,(int *) src + (sizeof(int) * TEST_W * TEST_H));
+#endif
+        clock_gettime(CLOCK_REALTIME, &start);
+        sse_prefetch_transpose_omp(src, out0, TEST_W, TEST_H);
+        clock_gettime(CLOCK_REALTIME, &end);
+#if defined(BENCH)
+        printf("%ld, ", diff_in_us(start, end));
+#else
+        printf("sse prf & omp: \t %ld us\n", diff_in_us(start, end));
+#endif
+#if defined(__GNUC__)
+        __builtin___clear_cache((int *) src ,(int *) src + (sizeof(int) * TEST_W * TEST_H));
+#endif
         clock_gettime(CLOCK_REALTIME, &start);
         sse_transpose(src, out1, TEST_W, TEST_H);
         clock_gettime(CLOCK_REALTIME, &end);
@@ -89,14 +105,38 @@ int main(int argc, char *argv[])
 #else
         printf("sse: \t\t %ld us\n", diff_in_us(start, end));
 #endif
-
+#if defined(__GNUC__)
+        __builtin___clear_cache((int *) src ,(int *) src + (sizeof(int) * TEST_W * TEST_H));
+#endif
+        clock_gettime(CLOCK_REALTIME, &start);
+        sse_transpose_omp(src, out1, TEST_W, TEST_H);
+        clock_gettime(CLOCK_REALTIME, &end);
+#if defined(BENCH)
+        printf("%ld, ", diff_in_us(start, end));
+#else
+        printf("sse omp: \t %ld us\n", diff_in_us(start, end));
+#endif
+#if defined(__GNUC__)
+        __builtin___clear_cache((int *) src ,(int *) src + (sizeof(int) * TEST_W * TEST_H));
+#endif
         clock_gettime(CLOCK_REALTIME, &start);
         naive_transpose(src, out2, TEST_W, TEST_H);
         clock_gettime(CLOCK_REALTIME, &end);
 #if defined(BENCH)
-        printf("%ld\n", diff_in_us(start, end));
+        printf("%ld, ", diff_in_us(start, end));
 #else
         printf("naive: \t\t %ld us\n", diff_in_us(start, end));
+#endif
+#if defined(__GNUC__)
+        __builtin___clear_cache((int *) src ,(int *) src + (sizeof(int) * TEST_W * TEST_H));
+#endif
+        clock_gettime(CLOCK_REALTIME, &start);
+        naive_transpose_omp(src, out2, TEST_W, TEST_H);
+        clock_gettime(CLOCK_REALTIME, &end);
+#if defined(BENCH)
+        printf("%ld\n", diff_in_us(start, end));
+#else
+        printf("naive omp: \t %ld us\n", diff_in_us(start, end));
 #endif
 
 #else

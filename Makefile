@@ -1,4 +1,4 @@
-CFLAGS = -msse2 --std gnu99 -O0 -Wall
+CFLAGS = -msse2 --std gnu99 -O0 -Wall -fopenmp
 exec = main bench sse_only sse_prefetch pfdist
 
 GIT_HOOKS := .git/hooks/pre-commit
