@@ -100,15 +100,15 @@ int main(int argc, char *argv[])
 #endif
 
 #else
-        for(int i = 0; i < 50; i++) {
+        assert(argc > 1 && "Must define the prefetch distance");
+        int pfdist = atoi(argv[1]);
 #if defined(__GNUC__)
-            __builtin___clear_cache((int *) src ,(int *) src + (sizeof(int) * TEST_W * TEST_H));
+        __builtin___clear_cache((int *) src ,(int *) src + (sizeof(int) * TEST_W * TEST_H));
 #endif
-            clock_gettime(CLOCK_REALTIME, &start);
-            sse_prefetch_transpose_2(src, out0, TEST_W, TEST_H, i*4);
-            clock_gettime(CLOCK_REALTIME, &end);
-            printf("%d,%ld\n", i*4, diff_in_us(start, end));
-        }
+        clock_gettime(CLOCK_REALTIME, &start);
+        sse_prefetch_transpose_2(src, out0, TEST_W, TEST_H, pfdist);
+        clock_gettime(CLOCK_REALTIME, &end);
+        printf("%d,%ld\n", pfdist, diff_in_us(start, end));
 #endif
 
         free(src);
