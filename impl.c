@@ -1,6 +1,6 @@
 #ifndef TRANSPOSE_IMPL
 #define TRANSPOSE_IMPL
-#define THREADS 4
+#define THREADS sysconf(_SC_NPROCESSORS_ONLN)
 
 void naive_transpose_omp(int *src, int *dst, int w, int h)
 {
